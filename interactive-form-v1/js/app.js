@@ -4,7 +4,6 @@ $(document).ready(function () {
     //When the page loads, give focus to the first text field
     $("input:text:visible:first").focus();
 
-
     //”Job Role” section of the form:
     //A text field that will be revealed when the "Other" option is selected from the "Job Role" drop down menu.
     //Give the field an id of “other-title,” and add the placeholder text of "Your Job Role" to the field.
@@ -22,20 +21,24 @@ $(document).ready(function () {
     //For the T-Shirt color menu, only display the color options that match the design selected in the "Design" menu.
     //If the user selects "Theme - JS Puns" then the color menu should only display "Cornflower Blue," "Dark Slate Grey," and "Gold."
     //If the user selects "Theme - I ♥ JS" then the color menu should only display "Tomato," "Steel Blue," and "Dim Grey."
-    //$('#color option').css('display', 'none');
 
 
+    $('#colors-js-puns').css('display', 'none')
     $('#design').change(function () {
         var value = $(this).val();
         if (value === "js puns") {
-            $('#color option').css('display', 'block')
+            $('#colors-js-puns').css('display', 'block');
+            $('#color option').css('display', 'block');
             $('#color option').slice(3, 6).css('display', 'none');
             $('#color').val('cornflowerblue');
             // $('#color option').slice(0, 2);
         } else if (value === "heart js") {
+            $('#colors-js-puns').css('display', 'block');
             $('#color option').css('display', 'block')
             $('#color option').slice(0, 3).css('display', 'none');
             $('#color').val("tomato");
+        } else {
+            $('#colors-js-puns').css('display', 'none')
         }
     });
 
@@ -124,7 +127,6 @@ $(document).ready(function () {
     $('#payment').change(function () {
         var value = $(this).val();
         if (value === "paypal") {
-            //$('.credit-card').css('display', 'block')
             $('fieldset div p').css('display', 'none');
             $('.credit-card').css('display', 'none');
             $('fieldset div p:first').css('display', 'block');
@@ -153,6 +155,127 @@ $(document).ready(function () {
     //Credit card field should only accept a number between 13 and 16 digits
     //The zipcode field should accept a 5-digit number
     //The CVV should only accept a number that is exactly 3 digits long
+
+
+    $('#mail').on("keyup", function () {
+        if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/g.test($('#mail').val()) && $('#mail').val() !== '') {
+            $('#mail').removeAttr('style', "border:#FF0000 2px solid;");
+            $('.mailError').remove();
+        } else {
+            $('.mailError').remove();
+            if (/@/.test($('#mail').val()) === false) {
+                $('#mail').after('<p class="mailError" style="color:red;">Please include an "@"</p>');
+            }
+            if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/g.test($('#mail').val()) === false) {
+                $('#mail').after('<p class="mailError" style="color:red;">Please include an top-level domains, such as ".com, .uk.co, etc."</p>');
+            }
+            $('#mail').attr('style', "border:#FF0000 2px solid;");
+            $('button').after('<p class="mailError" style="color:red;">Please enter a valid e-mail</p>');
+        }
+    });
+
+    //    $('#cc-num').on("keyup", function () {
+    //        var value = $('#payment').val();
+    //        if (value === "credit card" || value === "select_method") {
+    //            if (/\b\d{13,16}\b/g.test($('#cc-num').val()) && $('#cc-num').val() !== '') {
+    //                $('#cc-num').removeAttr('style', "border:#FF0000 2px solid;");
+    //                $('.creditCardError').remove();
+    //            } else {
+    //                $('.creditCardError').remove();
+    //                $('#cc-num').attr('style', "border:#FF0000 2px solid;");
+    //                $('button').after('<p class="creditCardError" style="color:red;">Please enter a valid credit card number</p>');
+    //                event.preventDefault();
+    //            }
+    //        }
+    //    });
+
+
+    $("button").click(function (event) {
+
+        if (/[a-zA-Z]/g.test($('#name').val()) && $('#name').val() !== '') {
+            $('#name').removeAttr('style', "border:#FF0000 2px solid;");
+            $('.nameError').remove();
+        } else {
+            $('.nameError').remove();
+            $('#name').attr('style', "border:#FF0000 2px solid;");
+            $('button').after('<p class="nameError" style="color:red;">Please enter a valid name</p>');
+            event.preventDefault();
+        }
+
+        if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/g.test($('#mail').val()) && $('#mail').val() !== '') {
+            $('#mail').removeAttr('style', "border:#FF0000 2px solid;");
+            $('.mailError').remove();
+        } else {
+            $('.mailError').remove();
+            $('#mail').attr('style', "border:#FF0000 2px solid;");
+            $('button').after('<p class="mailError" style="color:red;">Please enter a valid e-mail</p>');
+            event.preventDefault();
+        }
+
+
+        if ($('.activities input[type=checkbox]:checked').length == 0) {
+            $('.activityError').remove();
+            $('.activities legend').attr('style', "border:#FF0000 2px solid;");
+            $('button').after('<p class="activityError" style="color:red;">Please select a valid activity</p>');
+            event.preventDefault();
+        } else {
+            $('.activities legend').removeAttr('style', "border:#FF0000 2px solid;");
+            $('.activityError').remove();
+
+        }
+
+
+
+
+        var value = $('#payment').val();
+        if (value === "credit card" || value === "select_method") {
+            if (/\b\d{13,16}\b/g.test($('#cc-num').val()) && $('#cc-num').val() !== '') {
+                $('#cc-num').removeAttr('style', "border:#FF0000 2px solid;");
+                $('.creditCardError').remove();
+            } else {
+                $('.creditCardError').remove();
+                $('#cc-num').attr('style', "border:#FF0000 2px solid;");
+                $('button').after('<p class="creditCardError" style="color:red;">Please enter a valid credit card number</p>');
+                event.preventDefault();
+            }
+
+            if (/\b\d{5}\b/g.test($('#zip').val()) && $('#zip').val() !== '') {
+                $('#zip').removeAttr('style', "border:#FF0000 2px solid;");
+                $('.zipError').remove();
+            } else {
+                $('.zipError').remove();
+                $('#zip').attr('style', "border:#FF0000 2px solid;");
+                $('button').after('<p class="zipError" style="color:red;">Please enter a valid zip code</p>');
+                event.preventDefault();
+            }
+
+            if (/\b\d{3}\b/g.test($('#cvv').val()) && $('#cvv').val() !== '') {
+                $('#cvv').removeAttr('style', "border:#FF0000 2px solid;");
+                $('.cvvError').remove();
+            } else {
+                $('.cvvError').remove();
+                $('#cvv').attr('style', "border:#FF0000 2px solid;");
+                $('button').after('<p class="cvvError" style="color:red;">Please enter a valid ccv number</p>');
+                event.preventDefault();
+            }
+        } else {
+            $('#cc-num').removeAttr('style', "border:#FF0000 2px solid;");
+            $('.creditCardError').remove();
+            $('#zip').removeAttr('style', "border:#FF0000 2px solid;");
+            $('.zipError').remove();
+            $('#cvv').removeAttr('style', "border:#FF0000 2px solid;");
+            $('.cvvError').remove();
+        }
+
+
+
+        //event.preventDefault();
+    });
+
+    //$("button").removeAttr("type");
+
+    //$("button").attr("title", 'submit');
+
 
 
     //Form validation messages:
