@@ -158,14 +158,8 @@ $(document).ready(function () {
     });
 
 
-    function name(test) {
-        $('button').after('<p class="' + test + '" style="color:red;">' + test + '</p>');
-    }
-
-    name("suck");
-    $('.suck').remove();
-
-
+    // Sets the defualt to credit card
+    $("#payment").val("credit card");
     $("button").click(function (event) {
 
         function errorCorrected(name, errorName) {
