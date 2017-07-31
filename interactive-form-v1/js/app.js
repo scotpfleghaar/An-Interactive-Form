@@ -1,15 +1,15 @@
 $(document).ready(function () {
 
     //Set focus on the first text field
-    //When the page loads, give focus to the first text field
     $("input:text:visible:first").focus();
 
-    //”Job Role” section of the form:
-    //A text field that will be revealed when the "Other" option is selected from the "Job Role" drop down menu.
-    //Give the field an id of “other-title,” and add the placeholder text of "Your Job Role" to the field.
 
-    // With JavaScript:
+    /////////Basic info section ////////
+    // Assuming the javascript is not enabled then the element will NOT be hidden.
+    // When JavaScript is enables then the following hides the element
     $('#other-title').remove();
+
+    // This block shows the other text input box when other is selected from dropdown.
     $('#title').change(function () {
         var value = $(this).val();
         if (value === "other") {
@@ -17,96 +17,83 @@ $(document).ready(function () {
         }
     });
 
-    //    ”T-Shirt Info” section of the form:
-    //For the T-Shirt color menu, only display the color options that match the design selected in the "Design" menu.
-    //If the user selects "Theme - JS Puns" then the color menu should only display "Cornflower Blue," "Dark Slate Grey," and "Gold."
-    //If the user selects "Theme - I ♥ JS" then the color menu should only display "Tomato," "Steel Blue," and "Dim Grey."
+    //////////// ”T-Shirt Info” section /////////////
 
+    // This makes the color dropdown menu hidden until a shirt is selected:
+    $('#colors-js-puns').css('display', 'none');
 
-    $('#colors-js-puns').css('display', 'none')
+    //Here we change the color options available base on the design chosen:
     $('#design').change(function () {
-        var value = $(this).val();
-        if (value === "js puns") {
+        var value = $(this).val(); // Selects the value of the dropdown
+
+        // This is refactored code according to Evan Burchard Book it retains the functionality
+        // But cuts down on code and inproves performance. 
+        function displayList(numFrom, numTo, colorValue) {
             $('#colors-js-puns').css('display', 'block');
             $('#color option').css('display', 'block');
-            $('#color option').slice(3, 6).css('display', 'none');
-            $('#color').val('cornflowerblue');
-            // $('#color option').slice(0, 2);
+            $('#color option').slice(numFrom, numTo).css('display', 'none');
+            $('#color').val(colorValue);
+        }
+        if (value === "js puns") {
+            displayList(3, 6, "cornflowerblue");
         } else if (value === "heart js") {
-            $('#colors-js-puns').css('display', 'block');
-            $('#color option').css('display', 'block')
-            $('#color option').slice(0, 3).css('display', 'none');
-            $('#color').val("tomato");
+            displayList(0, 3, "tomato");
         } else {
-            $('#colors-js-puns').css('display', 'none')
+            $('#colors-js-puns').css('display', 'none');
         }
     });
 
 
 
-    //    ”Register for Activities” section of the form:
-    //Some events are at the same time as others. If the user selects a workshop, don't allow selection of a workshop at the same date and time -- you should disable the checkbox and visually indicate that the workshop in the competing time slot isn't available.
-    //When a user unchecks an activity, make sure that competing activities (if there are any) are no longer disabled.
-    //As a user selects activities, a running total should display below the list of checkboxes. For example, if the user selects "Main Conference", then Total: $200 should appear. If they add 1 workshop, the total should change to Total: $300.
+    /////////// ”Register for Activities” section of the form: //////////
 
-
-    //    $(".activities input").change(function () {
-    //        var $input = $(this);
-    //        $("p").html(
-    //            ".attr( \"checked\" ): <b>" + $input.attr("checked") + "</b><br>" +
-    //            ".prop( \"checked\" ): <b>" + $input.prop("checked") + "</b><br>" +
-    //            ".is( \":checked\" ): <b>" + $input.is(":checked") + "</b>");
-    //    }).change();
-
+    // This controls when a button is selected the other is faded.
     $('.activities input').change(function () {
         var totalPrice = 0;
-        if ($('input[name="all"]').prop('checked') == true) {
+
+        // This Fades the activity selected
+        function fadeOutActivity(activity) {
+            $('input[name=' + activity + ']').parent().fadeTo("slow", 0.33);
+            $('input[name=' + activity + ']').prop('disabled', true);
+            totalPrice += 100;
+        }
+
+        // This fades in the activity selected
+        function fadeInActivity(activity) {
+            $('input[name=' + activity + ']').parent().fadeTo("slow", 1);
+            $('input[name=' + activity + ']').prop('disabled', false);
+        }
+
+        //This function targets the activity we have selected and fades the other
+        function toggleFadeActivity(name, otherName) {
+            if ($('input[name=' + name + ']').prop('checked') === true) {
+                fadeOutActivity(otherName);
+            } else {
+                fadeInActivity(otherName);
+            }
+        }
+
+        //This function refactors individal checkboxes that dont fade other upon click.
+        function singleActivityDisplay(activity) {
+            if ($('input[name=' + activity + ']').prop('checked') === true) {
+                totalPrice += 100;
+            }
+        }
+
+        // this is the first checkbox Main Coonference
+        if ($('input[name="all"]').prop('checked') === true) {
             totalPrice += 200;
         }
 
-        if ($('input[name="js-frameworks"]').prop('checked') == true) {
-            $('input[name="express"]').parent().fadeTo("slow", 0.33)
-            $('input[name="express"]').prop('checked', false);
-            totalPrice += 100;
-        } else if ($('input[name="js-frameworks"]').prop('checked') == false) {
-            $('input[name="express"]').parent().fadeTo("slow", 1)
-            $('input[name="express"]').prop('checked');
-        }
+        // After some refactoring we have these functions doing all the work
+        toggleFadeActivity("js-frameworks", "express");
+        toggleFadeActivity("js-libs", "node");
+        toggleFadeActivity("express", "js-frameworks");
+        toggleFadeActivity("node", "js-libs");
 
-        if ($('input[name="js-libs"]').prop('checked') == true) {
-            $('input[name="node"]').parent().fadeTo("slow", 0.33)
-            $('input[name="node"]').prop('checked', false);
-            totalPrice += 100;
-        } else {
-            $('input[name="node"]').parent().fadeTo("slow", 1)
-            $('input[name="node"]').prop('checked');
-        }
+        singleActivityDisplay("build-tools");
+        singleActivityDisplay("npm");
 
-        if ($('input[name="express"]').prop('checked') == true) {
-            $('input[name="js-frameworks"]').parent().fadeTo("slow", 0.33)
-            $('input[name="js-frameworks"]').prop('checked', false);
-            totalPrice += 100;
-        } else {
-            $('input[name="js-frameworks"]').parent().fadeTo("slow", 1)
-            $('input[name="js-frameworks"]').prop('checked');
-        }
-
-        if ($('input[name="node"]').prop('checked') == true) {
-            $('input[name="js-libs"]').parent().fadeTo("slow", 0.33)
-            $('input[name="js-libs"]').prop('checked', false);
-            totalPrice += 100;
-        } else {
-            $('input[name="js-libs"]').parent().fadeTo("slow", 1)
-            $('input[name="js-libs"]').prop('checked');
-        }
-
-        if ($('input[name="build-tools"]').prop('checked') == true) {
-            totalPrice += 100;
-        }
-
-        if ($('input[name="npm"]').prop('checked') == true) {
-            totalPrice += 100;
-        }
         $(".totalPrice").remove();
         $(".activities").after("<p class='totalPrice'>Total Price: $" + totalPrice + "</p>");
     });
@@ -118,27 +105,30 @@ $(document).ready(function () {
 
 
 
-    //    Payment Info section of the form:
-    //Display payment sections based on the payment option chosen in the select menu
-    //The "Credit Card" payment option should be selected by default, display the #credit-card div, and hide the "Paypal" and "Bitcoin information.
-    //When a user selects the "PayPal" payment option, the Paypal information should display, and the credit card and “Bitcoin” information should be hidden.
-    //When a user selects the "Bitcoin" payment option, the Bitcoin information should display, and the credit card and “PayPal” information should be hidden.
+    ///////////// Payment Info section ////////////
 
+    // This function handles all the selections and reactions tp them in the payment drop down.
     $('#payment').change(function () {
         var value = $(this).val();
-        if (value === "paypal") {
+
+        // This funciton hides the paragraphs for paypal and bitcoin when the other options are selected
+        // This is probably unnecesary refactoring but if gave me more experiance
+        function displayNone() {
             $('fieldset div p').css('display', 'none');
             $('.credit-card').css('display', 'none');
+        }
+
+        if (value === "paypal") {
+            displayNone();
             $('fieldset div p:first').css('display', 'block');
         } else if (value === "bitcoin") {
-            $('fieldset div p').css('display', 'none');
-            $('.credit-card').css('display', 'none')
+            displayNone();
             $('fieldset div p:last').css('display', 'block');
         } else if (value === "credit card") {
-            $('.credit-card').css('display', 'block')
+            $('.credit-card').css('display', 'block');
             $('fieldset div p').css('display', 'none');
         } else {
-            $('.credit-card').css('display', 'block')
+            $('.credit-card').css('display', 'block');
             $('fieldset div p').css('display', 'block');
         }
     });
@@ -146,25 +136,18 @@ $(document).ready(function () {
 
 
 
-    //    Form validation:
-    //If any of the following validation errors exist, prevent the user from submitting the form:
-    //Name field can't be blank
-    //Email field must be a validly formatted e-mail address (you don't have to check that it's a real e-mail address, just that it's formatted like one: dave@teamtreehouse.com for example.
-    //Must select at least one checkbox under the "Register for Activities" section of the form.
-    //If the selected payment option is "Credit Card," make sure the user has supplied a credit card number, a zip code, and a 3 number CVV value before the form can be submitted.
-    //Credit card field should only accept a number between 13 and 16 digits
-    //The zipcode field should accept a 5-digit number
-    //The CVV should only accept a number that is exactly 3 digits long
+    ////////// Form validation /////////////
 
 
+    // Here we dynamically looking at the email input of our page to validate infomation as it is typed. 
     $('#mail').on("keyup", function () {
-        if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/g.test($('#mail').val()) && $('#mail').val() !== '') {
+        if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/g.test($('#mail').val()) && $('#mail').val() !== '') { // I love this regex, it checks the format of out email and accepts internation email address as well (.co.uk).
             $('#mail').removeAttr('style', "border:#FF0000 2px solid;");
             $('.mailError').remove();
         } else {
             $('.mailError').remove();
-            if (/@/.test($('#mail').val()) === false) {
-                $('#mail').after('<p class="mailError" style="color:red;">Please include an "@"</p>');
+            if (/@/.test($('#mail').val()) === false) { // Checking to see of the "@" is included.
+                $('#mail').after('<p class="mailError" style="color:red;">Please include an "@"</p>'); // Adding the error after input element
             }
             if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/g.test($('#mail').val()) === false) {
                 $('#mail').after('<p class="mailError" style="color:red;">Please include an top-level domains, such as ".com, .uk.co, etc."</p>');
@@ -174,121 +157,72 @@ $(document).ready(function () {
         }
     });
 
-    //    $('#cc-num').on("keyup", function () {
-    //        var value = $('#payment').val();
-    //        if (value === "credit card" || value === "select_method") {
-    //            if (/\b\d{13,16}\b/g.test($('#cc-num').val()) && $('#cc-num').val() !== '') {
-    //                $('#cc-num').removeAttr('style', "border:#FF0000 2px solid;");
-    //                $('.creditCardError').remove();
-    //            } else {
-    //                $('.creditCardError').remove();
-    //                $('#cc-num').attr('style', "border:#FF0000 2px solid;");
-    //                $('button').after('<p class="creditCardError" style="color:red;">Please enter a valid credit card number</p>');
-    //                event.preventDefault();
-    //            }
-    //        }
-    //    });
+
+    function name(test) {
+        $('button').after('<p class="' + test + '" style="color:red;">' + test + '</p>');
+    }
+
+    name("suck");
+    $('.suck').remove();
 
 
     $("button").click(function (event) {
 
-        if (/[a-zA-Z]/g.test($('#name').val()) && $('#name').val() !== '') {
-            $('#name').removeAttr('style', "border:#FF0000 2px solid;");
-            $('.nameError').remove();
-        } else {
-            $('.nameError').remove();
-            $('#name').attr('style', "border:#FF0000 2px solid;");
-            $('button').after('<p class="nameError" style="color:red;">Please enter a valid name</p>');
+        function errorCorrected(name, errorName) {
+            $(name).removeAttr('style', "border:#FF0000 2px solid;");
+            $(errorName).remove();
+        }
+
+        function displayError(targetName, className, errorID, message) {
+            $(targetName).remove();
+            $(errorID).attr('style', "border:#FF0000 2px solid;");
+            $('button').after('<p class="' + className + '" style="color:red;">' + message + '</p>');
             event.preventDefault();
+        }
+
+        if (/[a-zA-Z]/g.test($('#name').val()) && $('#name').val() !== '') {
+            errorCorrected('#name', '.nameError');
+        } else {
+            displayError('.nameError', "nameError", '#name', "Please enter a valid name");
         }
 
         if (/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/g.test($('#mail').val()) && $('#mail').val() !== '') {
-            $('#mail').removeAttr('style', "border:#FF0000 2px solid;");
-            $('.mailError').remove();
+            errorCorrected('#mail', '.mailError');
         } else {
-            $('.mailError').remove();
-            $('#mail').attr('style', "border:#FF0000 2px solid;");
-            $('button').after('<p class="mailError" style="color:red;">Please enter a valid e-mail</p>');
-            event.preventDefault();
+            displayError('.mailError', "mailError", '#mail', "Please enter a valid e-mail");
         }
 
-
-        if ($('.activities input[type=checkbox]:checked').length == 0) {
+        if ($('.activities input[type=checkbox]:checked').length === 0) {
             $('.activityError').remove();
-            $('.activities legend').attr('style', "border:#FF0000 2px solid;");
+            $('.activities legend').after('<p class="activityError" style="color:red;">Please select at least one of the following:</p>');
             $('button').after('<p class="activityError" style="color:red;">Please select a valid activity</p>');
             event.preventDefault();
         } else {
-            $('.activities legend').removeAttr('style', "border:#FF0000 2px solid;");
-            $('.activityError').remove();
-
+            errorCorrected('.activities legend', '.activityError');
         }
-
-
-
 
         var value = $('#payment').val();
         if (value === "credit card" || value === "select_method") {
             if (/\b\d{13,16}\b/g.test($('#cc-num').val()) && $('#cc-num').val() !== '') {
-                $('#cc-num').removeAttr('style', "border:#FF0000 2px solid;");
-                $('.creditCardError').remove();
+                errorCorrected('#cc-num', '.creditCardError');
             } else {
-                $('.creditCardError').remove();
-                $('#cc-num').attr('style', "border:#FF0000 2px solid;");
-                $('button').after('<p class="creditCardError" style="color:red;">Please enter a valid credit card number</p>');
-                event.preventDefault();
+                displayError('.creditCardError', "creditCardError", '#cc-num', "Please enter a valid credit card number");
             }
-
             if (/\b\d{5}\b/g.test($('#zip').val()) && $('#zip').val() !== '') {
-                $('#zip').removeAttr('style', "border:#FF0000 2px solid;");
-                $('.zipError').remove();
+                errorCorrected('#zip', '.zipError');
             } else {
-                $('.zipError').remove();
-                $('#zip').attr('style', "border:#FF0000 2px solid;");
-                $('button').after('<p class="zipError" style="color:red;">Please enter a valid zip code</p>');
-                event.preventDefault();
+                displayError('.zipError', "zipError", '#zip', "Please enter a valid zip code");
             }
-
             if (/\b\d{3}\b/g.test($('#cvv').val()) && $('#cvv').val() !== '') {
-                $('#cvv').removeAttr('style', "border:#FF0000 2px solid;");
-                $('.cvvError').remove();
+                errorCorrected('#cvv', '.cvvError');
             } else {
+                displayError('.cvvError', "cvvError", '#cvv', "Please enter a valid ccv number");
                 $('.cvvError').remove();
-                $('#cvv').attr('style', "border:#FF0000 2px solid;");
-                $('button').after('<p class="cvvError" style="color:red;">Please enter a valid ccv number</p>');
-                event.preventDefault();
             }
         } else {
-            $('#cc-num').removeAttr('style', "border:#FF0000 2px solid;");
-            $('.creditCardError').remove();
-            $('#zip').removeAttr('style', "border:#FF0000 2px solid;");
-            $('.zipError').remove();
-            $('#cvv').removeAttr('style', "border:#FF0000 2px solid;");
-            $('.cvvError').remove();
+            errorCorrected('#cc-num', '.creditCardError');
+            errorCorrected('#zip', '.zipError');
+            errorCorrected('#cvv', '.cvvError');
         }
-
-
-
-        //event.preventDefault();
     });
-
-    //$("button").removeAttr("type");
-
-    //$("button").attr("title", 'submit');
-
-
-
-    //Form validation messages:
-    //Provide some kind of indication when there’s a validation error. The field’s borders could turn red, for example, or a message could appear near the field or at the top of the form
-    //There should be an error indication for the name field, email field, “Register for Activities” checkboxes, credit card number, zip code, and CVV
-
-
-    //Hide the "Color" label and select menu until a T-Shirt design is selected from the "Design" menu.
-
-
-    //    Program at least one of your error messages so that more information is provided depending on the error. For example, if the user hasn’t entered a credit card number and the field is completely blank, the error message reads “Please enter a credit card number.” If the field isn’t empty but contains only 10 numbers, the error message reads “Please enter a number that is at least 16 digits long.”
-
-    //    Program your form so that it provides a real-time validation error message for at least one text input field. Rather than providing an error message on submit, your form should check for errors and display messages as the user begins typing inside a text field. For example, if the user enters an invalid email address, the error appears as the user begins to type, and disappears as soon as the user has entered a complete and correctly formatted email address. Please accomplish this will your own JavaScript code. Do not rely on HTML5's built-in email validation.
-
-
 });
